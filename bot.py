@@ -1,11 +1,44 @@
+# Initialize Jira client
+jira = JIRA(
+    server=JIRA_SERVER,
+    basic_auth=(JIRA_EMAIL, JIRA_TOKEN)
+)
+
+# Copilot: generate a function to create a Jira issue and return its key
+def create_jira_issue(summary: str, description: str, issuetype: str = "Task", project_key: str = "WC") -> str:
+    """
+    Create a Jira issue and return its key.
+    """
+    issue_fields = {
+        "project":     {"key": project_key},
+        "summary":     summary,
+        "description": description,
+        "issuetype":   {"name": issuetype},
+    }
+    issue = jira.create_issue(fields=issue_fields)
+    return issue.key
 import os
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
 from dotenv import load_dotenv
 
+# Jira integration
+from jira import JIRA
+
 # Load environment variables from .env file
 load_dotenv()
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+
+# Jira credentials
+JIRA_EMAIL  = os.getenv("JIRA_EMAIL")
+JIRA_TOKEN  = os.getenv("JIRA_TOKEN")
+JIRA_SERVER = os.getenv("JIRA_SERVER")
+
+# Initialize Jira client
+jira = JIRA(
+    server=JIRA_SERVER,
+    basic_auth=(JIRA_EMAIL, JIRA_TOKEN)
+)
 
 
 # Import handlers
