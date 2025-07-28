@@ -14,6 +14,7 @@ openai.api_key = OPENAI_API_KEY
 
 async def text_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_text = update.message.text
+    print(f"[User message] {user_text}")  # Log the user's message
     try:
         print(f"▶️ Using OpenAI model: {FINE_TUNED_MODEL!r}")
         response = openai.chat.completions.create(

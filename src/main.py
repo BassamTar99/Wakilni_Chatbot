@@ -1,11 +1,10 @@
 # FastAPI app + router mounts
 from fastapi import FastAPI
 
-app = FastAPI()
+from src.api.telegram import telegram_router
 
-# You can add router includes here, e.g.:
-# from src.api.telegram import telegram_router
-# app.include_router(telegram_router)
+app = FastAPI()
+app.include_router(telegram_router)
 
 @app.get("/")
 def root():
