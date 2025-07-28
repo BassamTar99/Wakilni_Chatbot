@@ -1,44 +1,51 @@
-# Initialize Jira client
-jira = JIRA(
-    server=JIRA_SERVER,
-    basic_auth=(JIRA_EMAIL, JIRA_TOKEN)
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+# Import all necessary telegram/ext terms
+from telegram import Update
+from telegram.ext import (
+    ApplicationBuilder,
+    CommandHandler,
+    MessageHandler,
+    filters,
+    ContextTypes
 )
 
-# Copilot: generate a function to create a Jira issue and return its key
-def create_jira_issue(summary: str, description: str, issuetype: str = "Task", project_key: str = "WC") -> str:
-    """
-    Create a Jira issue and return its key.
-    """
-    issue_fields = {
-        "project":     {"key": project_key},
-        "summary":     summary,
-        "description": description,
-        "issuetype":   {"name": issuetype},
-    }
-    issue = jira.create_issue(fields=issue_fields)
-    return issue.key
-import os
+# Add missing telegram imports
 from telegram import Update
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, ContextTypes, filters
-from dotenv import load_dotenv
+from telegram.ext import ContextTypes
 
-# Jira integration
-from jira import JIRA
+# Add missing imports for bot application and handlers
+from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
 
-# Load environment variables from .env file
-load_dotenv()
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+# 1. Point to your .env file
+env_path = Path(__file__).parent / ".env"
+load_dotenv(dotenv_path=env_path)
 
-# Jira credentials
+# 2. Pull them in
 JIRA_EMAIL  = os.getenv("JIRA_EMAIL")
 JIRA_TOKEN  = os.getenv("JIRA_TOKEN")
 JIRA_SERVER = os.getenv("JIRA_SERVER")
 
+# Add TELEGRAM_TOKEN from environment
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
+
+# 3. Debug-print what was loaded
+print("🔑 JIRA_EMAIL: ",      repr(JIRA_EMAIL))
+print("🔑 JIRA_TOKEN starts:", repr(JIRA_TOKEN)[:10], "…")
+print("🔑 JIRA_SERVER:",      repr(JIRA_SERVER))
+
+# 4. Fail early if any are missing
+for var_name, val in [("JIRA_EMAIL", JIRA_EMAIL),
+                      ("JIRA_TOKEN", JIRA_TOKEN),
+                      ("JIRA_SERVER", JIRA_SERVER)]:
+    if not val:
+        raise RuntimeError(f"❌ Missing env var: {var_name}")
+
 # Initialize Jira client
-jira = JIRA(
-    server=JIRA_SERVER,
-    basic_auth=(JIRA_EMAIL, JIRA_TOKEN)
-)
+
+from jira import JIRA
+jira = JIRA(server=JIRA_SERVER, basic_auth=(JIRA_EMAIL, JIRA_TOKEN))
 
 
 # Import handlers
