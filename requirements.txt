@@ -1,0 +1,8 @@
+fastapi
+python-dotenv
+openai
+jira
+pydantic
+sqlalchemy
+uvicorn
+python-telegram-bot

@@ -48,10 +48,11 @@ from jira import JIRA
 jira = JIRA(server=JIRA_SERVER, basic_auth=(JIRA_EMAIL, JIRA_TOKEN))
 
 
-# Import handlers
-from handlers.help_handler import help_command
-from handlers.analyse_handler import analyse_command
-from handlers.text_handler import text_message
+
+# Import handlers from new src.handlers location
+from src.handlers.help_handler import help_command
+from src.handlers.analyse_handler import analyse_command
+from src.handlers.text_handler import text_message
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text("Hi there!")
