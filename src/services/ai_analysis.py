@@ -1,39 +1,39 @@
 
+
 import os
 import openai
+from typing import List, Dict
 
-# Load OpenAI API key from environment
 openai.api_key = os.getenv("OPENAI_API_KEY")
+MODEL = os.getenv("OPENAI_FINE_TUNED_MODEL")  # ft:…Btd6MRY9
 
-def build_engineering_prompt(user_message, history=None):
+SYSTEM_PROMPT = (
+    "You are Wakilni’s support assistant. Analyze user messages "
+    "and either reply conversationally or output a JSON "
+    "create_issue command for new problems."
+)
+
+def build_prompt(conversation: List[Dict], user_input: str) -> List[Dict]:
     """
-    Build a prompt for the fine-tuned OpenAI model, including system instructions and conversation history.
+    Construct the messages list for OpenAI ChatCompletion:
+      1. system prompt
+      2. entire stored conversation
+      3. the new user_input
     """
-    system_prompt = (
-        "You are Wakilni’s support assistant. "
-        "Format your output as JSON. If the user needs a Jira ticket, output a JSON object with a 'create_issue' key. "
-        "Otherwise, reply with a plain answer."
+    msgs = [{"role":"system","content":SYSTEM_PROMPT}]
+    for msg in conversation:
+        msgs.append({"role": msg["role"], "content": msg["content"]})
+    msgs.append({"role":"user","content": user_input})
+    return msgs
+
+def call_openai(messages: List[Dict]) -> str:
+    """
+    Send to OpenAI and return the assistant’s reply.
+    """
+    resp = openai.ChatCompletion.create(
+        model=MODEL,
+        messages=messages,
+        temperature=0.2
     )
-    messages = [{"role": "system", "content": system_prompt}]
-    if history:
-        for msg in history:
-            messages.append({"role": msg["role"], "content": msg["text"]})
-    messages.append({"role": "user", "content": user_message})
-    return messages
-
-def call_openai(messages, model=None):
-    """
-    Call the OpenAI ChatCompletion API with the given messages and return the reply.
-    """
-    if model is None:
-        model = os.getenv("OPENAI_FINE_TUNED_MODEL", "gpt-3.5-turbo")
-    try:
-        response = openai.ChatCompletion.create(
-            model=model,
-            messages=messages,
-            temperature=0.2
-        )
-        return response["choices"][0]["message"]["content"]
-    except Exception as e:
-        return f"[AI error] {str(e)}"
+    return resp.choices[0].message.content.strip()
 
