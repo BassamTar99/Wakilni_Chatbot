@@ -5,6 +5,9 @@ import openai
 from dotenv import load_dotenv
 import json
 
+# Import conversation store
+from src.services.db_service import save_message, get_conversation
+
 # Load OpenAI API key from .env
 load_dotenv()
 
@@ -14,18 +17,32 @@ openai.api_key = OPENAI_API_KEY
 
 async def text_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_text = update.message.text
+    chat_id = str(update.message.chat_id)
     print(f"[User message] {user_text}")  # Log the user's message
+
+    # Save user message
+    save_message(chat_id, "user", user_text)
+
+    # Retrieve conversation history
+    history = get_conversation(chat_id)
+
+    # Build context-aware prompt for OpenAI
+    messages = [{"role": "system", "content": "You are Wakilni’s support assistant, always follow the fine-tuning style."}]
+    for msg in history:
+        messages.append({"role": msg["role"], "content": msg["content"]})
+    messages.append({"role": "user", "content": user_text})
+
     try:
         print(f"▶️ Using OpenAI model: {FINE_TUNED_MODEL!r}")
         response = openai.chat.completions.create(
             model=FINE_TUNED_MODEL,
-            messages=[
-                {"role": "system", "content": "You are Wakilni’s support assistant, always follow the fine-tuning style."},
-                {"role": "user", "content": user_text}
-            ],
+            messages=messages,
             temperature=0
         )
         ai_reply = response.choices[0].message.content.strip()
+
+        # Save bot reply
+        save_message(chat_id, "bot", ai_reply)
 
         # Try to parse a Jira ticket payload
         try:
