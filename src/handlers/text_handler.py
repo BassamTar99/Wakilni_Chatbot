@@ -65,3 +65,10 @@ async def text_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text(ai_reply)
     except Exception as e:
         await update.message.reply_text(f"[AI error] {str(e)}")
+    
+# Simple router for incoming text
+from src.handlers.analyse_handler import handle_analysis
+
+def handle_text(chat_id: str, text: str) -> str:
+    # TODO: if text.startswith('/help'): delegate to help_handler
+    return handle_analysis(chat_id, text)
