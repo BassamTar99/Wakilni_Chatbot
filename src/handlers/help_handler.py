@@ -9,7 +9,8 @@ def handle_help(chat_id: str) -> str:
         "Hi! I can help you:\n"
         "- Report an issue (just type your problem)\n"
         "- Get FAQs (/faq)\n"
-        "- Track your order (/track 12345)\n"
-        "- Cancel an order (/cancel 12345)\n"
+        "- Track your order (/track <order_id>)\n"
+        "- Cancel an order (/cancel <order_id>)\n"
+        "- Check order status (/status <order_id>)\n"
         "… and more!"
     )

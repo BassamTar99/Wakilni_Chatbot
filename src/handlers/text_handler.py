@@ -70,5 +70,26 @@ async def text_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 from src.handlers.analyse_handler import handle_analysis
 
 def handle_text(chat_id: str, text: str) -> str:
-    # TODO: if text.startswith('/help'): delegate to help_handler
-    return handle_analysis(chat_id, text)
+    if text.startswith('/help'):
+        from src.handlers.help_handler import handle_help
+        return handle_help(chat_id)
+    elif text.startswith('/track'):
+        order_id = text.split(' ', 1)[-1] if ' ' in text else None
+        if order_id:
+            return f"Tracking order {order_id}: Status is 'In Transit'."
+        else:
+            return "Please provide an order ID. Usage: /track <order_id>"
+    elif text.startswith('/cancel'):
+        order_id = text.split(' ', 1)[-1] if ' ' in text else None
+        if order_id:
+            return f"Order {order_id} has been cancelled."
+        else:
+            return "Please provide an order ID. Usage: /cancel <order_id>"
+    elif text.startswith('/status'):
+        order_id = text.split(' ', 1)[-1] if ' ' in text else None
+        if order_id:
+            return f"Order {order_id} status: Delivered."
+        else:
+            return "Please provide an order ID. Usage: /status <order_id>"
+    else:
+        return handle_analysis(chat_id, text)
