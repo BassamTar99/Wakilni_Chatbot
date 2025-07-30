@@ -15,18 +15,47 @@ SYSTEM_PROMPT = (
     "create_issue command for new problems."
 )
 
-def build_prompt(conversation: List[Dict], user_input: str) -> List[Dict]:
-    """
-    Construct the messages list for OpenAI ChatCompletion:
-      1. system prompt
-      2. entire stored conversation
-      3. the new user_input
-    """
-    msgs = [{"role":"system","content":SYSTEM_PROMPT}]
-    for msg in conversation:
-        msgs.append({"role": msg["role"], "content": msg["content"]})
-    msgs.append({"role":"user","content": user_input})
-    return msgs
+
+def format_history(history: List[Dict]) -> str:
+    lines = []
+    for msg in history[-5:]:  # last 5 messages
+        role = "User" if msg["role"] == "user" else "Bot"
+        lines.append(f"{role}: {msg['content']}")
+    return "\n".join(lines)
+
+def build_prompt(history: List[Dict], user_text: str) -> List[Dict]:
+    system_content = (
+        """
+You are Wakilni’s Automated Support Assistant.
+Given the conversation history and a new user message, you must choose exactly one of two JSON outputs—and nothing else:
+
+1. Direct answer:
+   Output a JSON object with a single key \"reply\", whose value is the text you’d send the user.
+
+2. Ticket creation:
+   Output a JSON object with a single key \"create_issue\", whose value is another object containing:
+     • summary: a 1-line summary
+     • description: full details
+     • issuetype: e.g. \"Task\"
+     • priority: one of \"P0\", \"P1\", \"P2\", or \"P3\"
+
+IMPORTANT:
+• Output must be valid JSON (no extra keys, no markdown, no prose).
+• Do not ask follow-up questions.
+• Do not wrap the JSON in backticks or quotes.
+"""
+    )
+    user_content = f"""
+Conversation history:
+{format_history(history)}
+
+New request:
+{user_text}
+"""
+    return [
+        {"role": "system", "content": system_content},
+        {"role": "user", "content": user_content}
+    ]
 
 def call_openai(messages: List[Dict]) -> str:
     """
