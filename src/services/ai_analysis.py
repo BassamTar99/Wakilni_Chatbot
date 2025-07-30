@@ -1,10 +1,12 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 
 
 import os
-import openai
+from openai import OpenAI
 from typing import List, Dict
 
-openai.api_key = os.getenv("OPENAI_API_KEY")
 MODEL = os.getenv("OPENAI_FINE_TUNED_MODEL")  # ft:…Btd6MRY9
 
 SYSTEM_PROMPT = (
@@ -28,9 +30,10 @@ def build_prompt(conversation: List[Dict], user_input: str) -> List[Dict]:
 
 def call_openai(messages: List[Dict]) -> str:
     """
-    Send to OpenAI and return the assistant’s reply.
+    Send to OpenAI and return the assistant’s reply using the new OpenAI API client.
     """
-    resp = openai.ChatCompletion.create(
+    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    resp = client.chat.completions.create(
         model=MODEL,
         messages=messages,
         temperature=0.2
