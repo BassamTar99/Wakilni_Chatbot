@@ -37,3 +37,7 @@ def call_openai(messages: List[Dict]) -> str:
     )
     return resp.choices[0].message.content.strip()
 
+# Alias for compatibility with telegram.py
+def build_engineering_prompt(user_input: str, conversation: List[Dict]) -> List[Dict]:
+    return build_prompt(conversation, user_input)
+

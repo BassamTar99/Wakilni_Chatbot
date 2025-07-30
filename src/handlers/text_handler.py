@@ -42,7 +42,7 @@ async def text_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         ai_reply = response.choices[0].message.content.strip()
 
         # Save bot reply
-        save_message(chat_id, "bot", ai_reply)
+        save_message(chat_id, "assistant", ai_reply)
 
         # Try to parse a Jira ticket payload
         try:

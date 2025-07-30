@@ -15,7 +15,7 @@ _conversations = defaultdict(list)
 def save_message(user_id, role, text, timestamp=None):
     """
     Save a message to the conversation history.
-    role: 'user' or 'bot'
+    role: 'user', 'assistant', or other valid OpenAI roles
     """
     chat_id = user_id  # Using user_id as chat_id for simplicity
     ts = timestamp or datetime.utcnow()

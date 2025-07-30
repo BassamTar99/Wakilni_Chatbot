@@ -59,7 +59,7 @@ async def telegram_webhook(request: Request):
         reply_text = f"✅ Created ticket {ticket_key}! Our team will follow up shortly."
 
     # 8. Save the bot reply to the conversation history
-    save_message(user_id, "bot", reply_text, int(time.time()))
+    save_message(user_id, "assistant", reply_text, int(time.time()))
 
     # 9. Send the reply to the user via Telegram API
     if chat_id:

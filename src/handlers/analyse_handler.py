@@ -11,5 +11,5 @@ def handle_analysis(chat_id: str, user_text: str) -> str:
     # 3. call OpenAI
     ai_reply = call_openai(prompt)
     # 4. save & return
-    save_message(chat_id, 'bot', ai_reply)
+    save_message(chat_id, 'assistant', ai_reply)
     return ai_reply
