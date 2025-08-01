@@ -27,29 +27,25 @@ async def text_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     history = get_conversation(chat_id)
 
     # Build context-aware prompt for OpenAI
-    messages = [{"role": "system", "content": "You are Wakilni’s support assistant, always follow the fine-tuning style."}]
-    for msg in history:
-        messages.append({"role": msg["role"], "content": msg["content"]})
-    messages.append({"role": "user", "content": user_text})
+    from src.services.ai_analysis import build_prompt, call_openai
+    messages = build_prompt(history, user_text)
 
     try:
         print(f"▶️ Using OpenAI model: {FINE_TUNED_MODEL!r}")
-        response = openai.chat.completions.create(
-            model=FINE_TUNED_MODEL,
-            messages=messages,
-            temperature=0
-        )
-        ai_reply = response.choices[0].message.content.strip()
+        ai_reply = call_openai(messages)
 
-        # Save bot reply
-        save_message(chat_id, "assistant", ai_reply)
-
-        # Try to parse a Jira ticket payload
+        # Parse structured output
         try:
             payload = json.loads(ai_reply)
-            if "create_issue" in payload:
+            language = payload.get("language")
+            category = payload.get("category")
+            suggestion = payload.get("suggestion")
+            resolution = payload.get("resolution")
+            escalation_flag = payload.get("escalation_flag")
+            confidence_score = payload.get("confidence_score")
+            jira_ticket_key = None
+            if payload.get("create_issue"):
                 ci = payload["create_issue"]
-                # Import create_jira_issue from services (to be implemented)
                 from src.services.jira_service import create_jira_issue
                 key = create_jira_issue(
                     ci["summary"],
@@ -57,12 +53,33 @@ async def text_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
                     issuetype=ci.get("issuetype", "Task"),
                     project_key=ci.get("project_key", "WC")
                 )
-                await update.message.reply_text(f"✅ Created ticket {key}! Our team will follow up shortly.")
-                return
+                jira_ticket_key = key
+                bot_reply = f"✅ Created ticket {key}! Our team will follow up shortly.\nSuggestion: {suggestion or ''}"
+            elif payload.get("resolution"):
+                bot_reply = f"{payload['resolution']}\nSuggestion: {suggestion or ''}"
+            else:
+                bot_reply = suggestion or ai_reply
         except Exception:
-            pass
+            # Fallback to raw reply if parsing fails
+            language = category = suggestion = resolution = escalation_flag = confidence_score = jira_ticket_key = None
+            bot_reply = ai_reply
 
-        await update.message.reply_text(ai_reply)
+        # Save bot reply with analysis
+        save_message(
+            chat_id,
+            "assistant",
+            bot_reply,
+            ai_analysis=ai_reply,
+            jira_ticket_key=jira_ticket_key,
+            language=language,
+            category=category,
+            suggestion=suggestion,
+            resolution=resolution,
+            escalation_flag=escalation_flag,
+            confidence_score=confidence_score
+        )
+
+        await update.message.reply_text(bot_reply)
     except Exception as e:
         await update.message.reply_text(f"[AI error] {str(e)}")
     

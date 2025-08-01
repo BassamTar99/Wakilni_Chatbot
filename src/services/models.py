@@ -28,6 +28,12 @@ class Message(Base):
     timestamp = Column(DateTime)
     ai_analysis = Column(JSONB)
     jira_ticket_key = Column(String(20))
+    language = Column(String(20))
+    category = Column(String(50))
+    suggestion = Column(Text)
+    resolution = Column(Text)
+    escalation_flag = Column(Boolean)
+    confidence_score = Column(Float)
     conversation = relationship('Conversation', back_populates='messages')
 
 class OnCallSchedule(Base):

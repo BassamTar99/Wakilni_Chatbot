@@ -6,7 +6,8 @@ from sqlalchemy.orm import Session
 from src.services.db_engine import SessionLocal
 from src.services.models import Message, Conversation
 
-def save_message(user_id, role, text, timestamp=None, message_type='text', ai_analysis=None, jira_ticket_key=None):
+def save_message(user_id, role, text, timestamp=None, message_type='text', ai_analysis=None, jira_ticket_key=None,
+                language=None, category=None, suggestion=None, resolution=None, escalation_flag=None, confidence_score=None):
     """
     Save a message to the conversation history in the database.
     role: 'user', 'assistant', or other valid OpenAI roles
@@ -27,7 +28,13 @@ def save_message(user_id, role, text, timestamp=None, message_type='text', ai_an
         message_type=message_type,
         timestamp=ts,
         ai_analysis=ai_analysis,
-        jira_ticket_key=jira_ticket_key
+        jira_ticket_key=jira_ticket_key,
+        language=language,
+        category=category,
+        suggestion=suggestion,
+        resolution=resolution,
+        escalation_flag=escalation_flag,
+        confidence_score=confidence_score
     )
     db.add(msg)
     conversation.updated_at = ts
