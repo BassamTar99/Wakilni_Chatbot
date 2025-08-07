@@ -26,15 +26,15 @@ async def text_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # Retrieve conversation history
     history = get_conversation(chat_id)
 
-    # Build context-aware prompt for OpenAI
-    from src.services.ai_analysis import build_prompt, call_openai
+    # Build context-aware prompt for OpenAI agent
+    from src.services.ai_analysis import build_prompt, call_openai_agent
     messages = build_prompt(history, user_text)
 
     try:
-        print(f"▶️ Using OpenAI model: {FINE_TUNED_MODEL!r}")
-        ai_reply = call_openai(messages)
+        print(f"▶️ Using OpenAI agentic model: {FINE_TUNED_MODEL!r}")
+        ai_reply = call_openai_agent(messages)
 
-        # Parse structured output
+        # Try to parse structured output (if JSON)
         try:
             payload = json.loads(ai_reply)
             language = payload.get("language")

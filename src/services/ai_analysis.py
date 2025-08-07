@@ -4,8 +4,68 @@ load_dotenv()
 
 
 import os
+
 from openai import OpenAI
-from typing import List, Dict
+from typing import List, Dict, Any
+import json
+
+# Import tool wrappers and define schemas
+from src.services.agent_tools import fetch_page, parse_requirements, run_diagnostics, lookup_faq, create_jira_issue
+
+# Tool schemas for OpenAI function-calling
+TOOL_SCHEMAS = [
+    {
+        "name": "fetch_page",
+        "description": "Retrieve a documentation or error page by URL",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "url": {"type": "string", "description": "The full URL of the Wakilni documentation or error spec."}
+            },
+            "required": ["url"]
+        }
+    },
+    {
+        "name": "parse_requirements",
+        "description": "Extract structured requirements from a docs page",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "html": {"type": "string", "description": "HTML content of the documentation page."}
+            },
+            "required": ["html"]
+        }
+    },
+    {
+        "name": "run_diagnostics",
+        "description": "Hit an internal health-check or status API",
+        "parameters": {"type": "object", "properties": {}, "required": []}
+    },
+    {
+        "name": "lookup_faq",
+        "description": "Query your FAQ vector store for top-n similar entries",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "query": {"type": "string", "description": "FAQ search query."}
+            },
+            "required": ["query"]
+        }
+    },
+    {
+        "name": "create_jira_issue",
+        "description": "Open a new Jira ticket when an actionable problem is found",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "summary": {"type": "string"},
+                "description": {"type": "string"},
+                "priority": {"type": "string"}
+            },
+            "required": ["summary", "description", "priority"]
+        }
+    }
+]
 
 MODEL = os.getenv("OPENAI_FINE_TUNED_MODEL")  # ft:…Btd6MRY9
 
@@ -60,17 +120,44 @@ New request:
         {"role": "user", "content": user_content}
     ]
 
-def call_openai(messages: List[Dict]) -> str:
+
+def call_openai_agent(messages: List[Dict]) -> str:
     """
-    Send to OpenAI and return the assistant’s reply using the new OpenAI API client.
+    Call OpenAI with function-calling, handle tool calls, and return the final assistant reply.
     """
     client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    resp = client.chat.completions.create(
-        model=MODEL,
-        messages=messages,
-        temperature=0.2
-    )
-    return resp.choices[0].message.content.strip()
+    tool_map = {
+        "fetch_page": fetch_page,
+        "parse_requirements": parse_requirements,
+        "run_diagnostics": run_diagnostics,
+        "lookup_faq": lookup_faq,
+        "create_jira_issue": create_jira_issue
+    }
+    while True:
+        resp = client.chat.completions.create(
+            model=MODEL,
+            messages=messages,
+            functions=TOOL_SCHEMAS,
+            function_call="auto",
+            temperature=0.2
+        )
+        msg = resp.choices[0].message
+        if msg.function_call:
+            fn_name = msg.function_call.name
+            fn_args = json.loads(msg.function_call.arguments)
+            fn = tool_map.get(fn_name)
+            if fn:
+                result = fn(**fn_args)
+            else:
+                result = {"error": f"Unknown tool: {fn_name}"}
+            messages.append({
+                "role": "function",
+                "name": fn_name,
+                "content": json.dumps(result)
+            })
+            continue  # Re-invoke with new function result
+        # If no function call, return the assistant's reply
+        return msg.content.strip() if msg.content else "[No reply]"
 
 # Alias for compatibility with telegram.py
 def build_engineering_prompt(user_input: str, conversation: List[Dict]) -> List[Dict]:
