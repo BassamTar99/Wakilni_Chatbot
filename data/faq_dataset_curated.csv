@@ -1,0 +1,11 @@
+category,question,answer
+StatusCheck,What are Wakilni's back-office hours and expected response times?,Our back-office operates Monday through Saturday, 8 AM to 5 PM. On WhatsApp we aim to reply within 20–30 minutes during these hours.
+Payment,When do I receive my cash-on-delivery payments?,Payments are processed twice weekly, on Monday and Thursday, and are remitted the same day.
+Logistics,How does the returns process work on Wakilni?,Open a return request in the portal, schedule a pickup, pack the item, and the driver will collect it as per your instructions.
+FeatureRequest,How do I create a new location for an existing recipient?,In the Wakilni portal, go to Recipients → Select recipient → Add Location → Fill in address details.
+Integration,Why are orders not showing up from my Shopify integration?,Please verify your store domain and API key in the Integration settings. Ensure all required fields are filled. If the issue persists, contact Wakilni support.
+Account,I didn't receive the password reset email. What should I do?,Check your spam folder, confirm your email is correct in your profile, then retry. If you still don't receive it, contact support.
+Delivery,Can I cancel my order after it's dispatched?,You can cancel an order before the driver scans the package. Reply with 'Cancel' and your order ID, or use the portal.
+Delivery,How can I track my order?,Visit wakilni.com/track and enter your order ID, or simply reply here with the order ID for an update.
+FeatureRequest,I wish the app could support multiple package shipments at once.,Thanks for the suggestion! I've logged it for our product team to review.
+SystemNotice,Is the system down right now?,There's no scheduled downtime. If you're experiencing errors, please wait a few minutes and try again, or contact support for urgent issues.

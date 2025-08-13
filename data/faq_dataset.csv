@@ -1,0 +1,11 @@
+question,answer,category
+"What are Wakilni's working hours?","Wakilni's back-office operates Monday to Saturday, 8am to 5pm. WhatsApp support is available during these hours.","policy"
+"How do I schedule a pickup?","To schedule a pickup, log in to your Wakilni portal, click 'Request Pickup', fill in the required details, and submit the form.","operations"
+"How often do I receive my cash on delivery payments?","Cash on delivery payments are processed and transferred to your account every Monday and Thursday.","accounting"
+"What should I do if my Shopify orders are not showing in Wakilni?","Check your Shopify integration settings, ensure your store domain and API key are correct, and verify that all required fields are filled. If the issue persists, contact Wakilni support.","integration"
+"I didn't receive the password reset email. What should I do?","Please check your spam folder and ensure your registered email is correct. If you still don't receive the email, contact Wakilni support for assistance.","account"
+"How do I add a new delivery location for an existing customer?","Go to the recipient's profile in the Wakilni portal, click 'Add Location', enter the new address details, and save.","operations"
+"What is the process for returns?","To process a return, select the order in your portal, click 'Return', and follow the on-screen instructions. For bulk returns, contact support.","operations"
+"How do I integrate my WooCommerce store with Wakilni?","Install the Wakilni WooCommerce plugin, enter your API credentials, and follow the setup wizard in your store's admin panel.","integration"
+"What to do if the driver app is not updating orders?","Ensure the device has internet connectivity and try refreshing the app. If the issue continues, contact Wakilni support.","operations"
+"How do I know if the system is under maintenance?","Scheduled maintenance is announced via the portal's notification banner. If you experience downtime, check for announcements or contact support.","policy"

@@ -12,7 +12,13 @@ def save_message(user_id, role, text, timestamp=None, message_type='text', ai_an
     Save a message to the conversation history in the database.
     role: 'user', 'assistant', or other valid OpenAI roles
     """
-    ts = timestamp or datetime.utcnow()
+    # Ensure ts is always a datetime object
+    if timestamp is None:
+        ts = datetime.utcnow()
+    elif isinstance(timestamp, (int, float)):
+        ts = datetime.fromtimestamp(timestamp)
+    else:
+        ts = timestamp
     db: Session = SessionLocal()
     # Find or create conversation
     conversation = db.query(Conversation).filter_by(user_id=user_id, is_active=True).first()

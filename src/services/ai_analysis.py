@@ -5,7 +5,7 @@ load_dotenv()
 
 import os
 
-from openai import OpenAI
+import openai
 from typing import List, Dict, Any
 import json
 
@@ -125,7 +125,6 @@ def call_openai_agent(messages: List[Dict]) -> str:
     """
     Call OpenAI with function-calling, handle tool calls, and return the final assistant reply.
     """
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     tool_map = {
         "fetch_page": fetch_page,
         "parse_requirements": parse_requirements,
@@ -134,7 +133,7 @@ def call_openai_agent(messages: List[Dict]) -> str:
         "create_jira_issue": create_jira_issue
     }
     while True:
-        resp = client.chat.completions.create(
+        resp = openai.ChatCompletion.create(
             model=MODEL,
             messages=messages,
             functions=TOOL_SCHEMAS,
@@ -142,7 +141,7 @@ def call_openai_agent(messages: List[Dict]) -> str:
             temperature=0.2
         )
         msg = resp.choices[0].message
-        if msg.function_call:
+        if hasattr(msg, 'function_call') and msg.function_call:
             fn_name = msg.function_call.name
             fn_args = json.loads(msg.function_call.arguments)
             fn = tool_map.get(fn_name)
@@ -156,8 +155,15 @@ def call_openai_agent(messages: List[Dict]) -> str:
                 "content": json.dumps(result)
             })
             continue  # Re-invoke with new function result
-        # If no function call, return the assistant's reply
-        return msg.content.strip() if msg.content else "[No reply]"
+        # If no function call, parse the assistant's reply and return only the suggestion
+        if msg.content:
+            try:
+                response_json = json.loads(msg.content.strip())
+                return response_json.get("suggestion", "[No suggestion found]")
+            except Exception:
+                return msg.content.strip()
+        else:
+            return "[No reply]"
 
 # Alias for compatibility with telegram.py
 def build_engineering_prompt(user_input: str, conversation: List[Dict]) -> List[Dict]:
