@@ -145,6 +145,8 @@ def call_openai_agent(messages: List[Dict]) -> str:
             fn_name = msg.function_call.name
             fn_args = json.loads(msg.function_call.arguments)
             fn = tool_map.get(fn_name)
+            print(msg)
+            print(resp)
             if fn:
                 result = fn(**fn_args)
             else:
@@ -155,15 +157,8 @@ def call_openai_agent(messages: List[Dict]) -> str:
                 "content": json.dumps(result)
             })
             continue  # Re-invoke with new function result
-        # If no function call, parse the assistant's reply and return only the suggestion
-        if msg.content:
-            try:
-                response_json = json.loads(msg.content.strip())
-                return response_json.get("suggestion", "[No suggestion found]")
-            except Exception:
-                return msg.content.strip()
-        else:
-            return "[No reply]"
+        # If no function call, return the assistant's reply (JSON string)
+        return msg.content.strip() if msg.content else "[No reply]"
 
 # Alias for compatibility with telegram.py
 def build_engineering_prompt(user_input: str, conversation: List[Dict]) -> List[Dict]:
