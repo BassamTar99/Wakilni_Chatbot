@@ -121,10 +121,12 @@ New request:
     ]
 
 
+
 def call_openai_agent(messages: List[Dict]) -> str:
     """
-    Call OpenAI with function-calling, handle tool calls, and return the final assistant reply.
+    Call OpenAI with function-calling, handle tool calls, and return the final assistant reply. Updated for openai>=1.0.0.
     """
+    from openai import OpenAI
     tool_map = {
         "fetch_page": fetch_page,
         "parse_requirements": parse_requirements,
@@ -132,25 +134,30 @@ def call_openai_agent(messages: List[Dict]) -> str:
         "lookup_faq": lookup_faq,
         "create_jira_issue": create_jira_issue
     }
+    api_key = os.getenv("OPENAI_API_KEY")
+    client = OpenAI(api_key=api_key)
     while True:
-        resp = openai.ChatCompletion.create(
+        resp = client.chat.completions.create(
             model=MODEL,
             messages=messages,
             functions=TOOL_SCHEMAS,
             function_call="auto",
             temperature=0.2
         )
+        print(f"Raw OpenAI API response: {resp}")
         msg = resp.choices[0].message
+        print(f"Parsed message: {msg}")
         if hasattr(msg, 'function_call') and msg.function_call:
             fn_name = msg.function_call.name
             fn_args = json.loads(msg.function_call.arguments)
             fn = tool_map.get(fn_name)
-            print(msg)
-            print(resp)
+            print(f"Function call detected: {fn_name} with args {fn_args}")
             if fn:
                 result = fn(**fn_args)
+                print(f"Function result: {result}")
             else:
                 result = {"error": f"Unknown tool: {fn_name}"}
+                print(f"Unknown tool: {fn_name}")
             messages.append({
                 "role": "function",
                 "name": fn_name,
@@ -158,6 +165,7 @@ def call_openai_agent(messages: List[Dict]) -> str:
             })
             continue  # Re-invoke with new function result
         # If no function call, return the assistant's reply (JSON string)
+        print(f"Returning assistant reply: {msg.content.strip() if msg.content else '[No reply]'}")
         return msg.content.strip() if msg.content else "[No reply]"
 
 # Alias for compatibility with telegram.py

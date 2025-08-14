@@ -49,6 +49,57 @@ def lookup_faq(query: str) -> list:
 
 def create_jira_issue(summary: str, description: str, priority: str) -> dict:
     """Open a new Jira ticket for actionable problems."""
-    # Placeholder: Replace with your actual Jira integration
-    # Example: return {"key": "WC-123"}
-    return {"key": "WC-123"}
+    import os
+    import requests
+    JIRA_EMAIL = os.getenv("JIRA_EMAIL")
+    JIRA_TOKEN = os.getenv("JIRA_TOKEN")
+    JIRA_SERVER = os.getenv("JIRA_SERVER")
+    url = f"{JIRA_SERVER}/rest/api/3/issue"
+    headers = {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+    }
+    auth = (JIRA_EMAIL, JIRA_TOKEN)
+    # Map priority string to JIRA priority id (example: P1->1, P2->2, etc.)
+    priority_map = {"P1": "1", "P2": "2", "P3": "3"}
+    priority_id = priority_map.get(priority, "3")
+    # Ensure description is in Atlassian Document Format
+    if isinstance(description, str):
+        description_adf = {
+            "type": "doc",
+            "version": 1,
+            "content": [
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": description
+                        }
+                    ]
+                }
+            ]
+        }
+    else:
+        description_adf = description
+    payload = {
+        "fields": {
+            "project": {"key": "WC"},
+            "summary": summary,
+            "description": description_adf,
+            "issuetype": {"name": "Task"}
+            # You can add priority if needed, but omit if it causes errors
+        }
+    }
+    try:
+        response = requests.post(url, json=payload, headers=headers, auth=auth)
+        if response.status_code != 201:
+            print(f"JIRA API error status: {response.status_code}")
+            print(f"JIRA API error body: {response.text}")
+            return {"error": response.text}
+        data = response.json()
+        print(f"JIRA API response: {data}")
+        return {"key": data.get("key", "")}
+    except Exception as e:
+        print(f"JIRA ticket creation failed: {e}")
+        return {"error": str(e)}
