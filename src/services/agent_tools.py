@@ -1,3 +1,68 @@
+# --- JIRA API utility functions ---
+import os
+
+def get_jira_auth_headers():
+    JIRA_EMAIL = os.getenv("JIRA_EMAIL")
+    JIRA_TOKEN = os.getenv("JIRA_TOKEN")
+    return {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+    }, (JIRA_EMAIL, JIRA_TOKEN)
+
+def get_jira_issue(issue_key: str) -> dict:
+    """Retrieve details for a JIRA issue by key."""
+    JIRA_SERVER = os.getenv("JIRA_SERVER")
+    url = f"{JIRA_SERVER}/rest/api/3/issue/{issue_key}"
+    headers, auth = get_jira_auth_headers()
+    try:
+        resp = requests.get(url, headers=headers, auth=auth)
+        resp.raise_for_status()
+        return resp.json()
+    except Exception as e:
+        print(f"JIRA get issue failed: {e}")
+        return {"error": str(e)}
+
+def list_jira_issues(jql: str, max_results: int = 10) -> dict:
+    """List JIRA issues using JQL (e.g., project=WC)."""
+    JIRA_SERVER = os.getenv("JIRA_SERVER")
+    url = f"{JIRA_SERVER}/rest/api/3/search"
+    headers, auth = get_jira_auth_headers()
+    params = {"jql": jql, "maxResults": max_results}
+    try:
+        resp = requests.get(url, headers=headers, auth=auth, params=params)
+        resp.raise_for_status()
+        return resp.json()
+    except Exception as e:
+        print(f"JIRA list issues failed: {e}")
+        return {"error": str(e)}
+
+def update_jira_issue(issue_key: str, fields: dict) -> dict:
+    """Update fields for a JIRA issue (e.g., summary, description, status)."""
+    JIRA_SERVER = os.getenv("JIRA_SERVER")
+    url = f"{JIRA_SERVER}/rest/api/3/issue/{issue_key}"
+    headers, auth = get_jira_auth_headers()
+    payload = {"fields": fields}
+    try:
+        resp = requests.put(url, json=payload, headers=headers, auth=auth)
+        resp.raise_for_status()
+        return {"success": True}
+    except Exception as e:
+        print(f"JIRA update issue failed: {e}")
+        return {"error": str(e)}
+
+def transition_jira_issue(issue_key: str, transition_id: str) -> dict:
+    """Transition (e.g., close) a JIRA issue by transition id."""
+    JIRA_SERVER = os.getenv("JIRA_SERVER")
+    url = f"{JIRA_SERVER}/rest/api/3/issue/{issue_key}/transitions"
+    headers, auth = get_jira_auth_headers()
+    payload = {"transition": {"id": transition_id}}
+    try:
+        resp = requests.post(url, json=payload, headers=headers, auth=auth)
+        resp.raise_for_status()
+        return {"success": True}
+    except Exception as e:
+        print(f"JIRA transition issue failed: {e}")
+        return {"error": str(e)}
 """
 agent_tools.py: Tool wrappers for agentic AI support bot
 """
