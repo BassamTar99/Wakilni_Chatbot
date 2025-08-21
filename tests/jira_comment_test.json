@@ -1,0 +1,18 @@
+{
+  "webhookEvent": "comment_created",
+  "issue": {
+    "key": "WC-123",
+    "fields": {
+      "summary": "Test issue from API"
+    }
+  },
+  "comment": {
+    "id": "10001",
+    "body": "This is a reply from staff.",
+    "author": {
+      "displayName": "Staff Name",
+      "emailAddress": "staff@example.com"
+    },
+    "created": "2025-08-20T12:00:00.000+0300"
+  }
+}
