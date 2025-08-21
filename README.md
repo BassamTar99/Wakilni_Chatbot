@@ -66,6 +66,4 @@ DB_PASSWORD=Bwt152005.
    `ngrok http 8000`
 6. **Configure Telegram and JIRA webhooks to point to your ngrok URL.**
 
-## License
 
-MIT
