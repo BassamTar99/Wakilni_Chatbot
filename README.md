@@ -48,10 +48,10 @@ Wakilni AI Support System is an intelligent support automation platform that con
    Create a `.env` file in the project root with the following:
    ```env
    TELEGRAM_TOKEN=7549711377:AAF_lg1fH6d9cHNhOff63ffX_a32oXjYjXw
-OPENAI_API_KEY=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
+OPENAI_API_KEY=**************************************************************
 OPENAI_FINE_TUNED_MODEL=ft:gpt-3.5-turbo-0125:personal::Btd6MRY9
 JIRA_EMAIL=samotarshishi152005@gmail.com
-JIRA_TOKEN=ATATT3xFfGF0NsyeM2SBP3ENb7AHGEmAIvU0MpthJ9Djc8DT5kVoTeU_Tdc3U1P57YzI6y0k7bdf_IaQ6Jz5PTjicMumKuTIF8Wy8oLXPvswcYecIUhpblbhq_y05CW6ZyPu4bffcqnTzTSCwMar5iidAvTr-EnXgwlgGqRNSczSAyeAFD40WzI=E22013DC
+JIRA_TOKEN=****************************************************
 JIRA_SERVER=https://samotarshishi152005.atlassian.net
 DB_HOST=localhost
 DB_PORT=5432
